@@ -64,7 +64,9 @@ The Node approach removes ceremony, letting you focus on what's being tested rat
 
 ### Overview
 
-Test data is often where the readability of a test falls apart: sprawling, highly duplicated fixtures swamp what the test is really trying to say. Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.
+Test data is often where the readability of a test falls apart: sprawling, highly duplicated fixtures swamp what the test is really trying to say. Static, centralised fixtures help a little, but they soon become cumbersome and brittle as every new case needs yet more hard coded data. A better approach is to randomly generate realistic data, then explicitly override the few values you care about. The result is a cleaner test suite with far clearer intent.
+
+**Note:** If your project already uses a random data generator (like faker, chance, or casual), prefer that library over adding falso as a new dependency.
 
 ### Key Benefits
 
@@ -181,6 +183,8 @@ The test client abstracts HTTP complexity while tests focus on behavior and asse
 ### Overview
 
 Testing time-based behaviour requires control over what "now" means. Without it you're left with fragile tests that depend on real system time or arbitrary sleeps. A better approach is to use a library that allows you to override the current time in tests.
+
+**Note:** If your project already uses date-fns or another date library, prefer that library's time control mechanism over adding luxon as a new dependency.
 
 ### Key Benefits
 
