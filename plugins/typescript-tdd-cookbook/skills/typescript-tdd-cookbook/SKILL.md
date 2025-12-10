@@ -266,7 +266,7 @@ it("rejects invalid email from validator", async () => {
 
 This pattern makes error validation tests clear and maintainable.
 
-## Stubbing HTTP with Nock
+## Stubbing HTTP with [Nock](https://github.com/nock/nock)
 
 ### Overview
 
@@ -380,6 +380,33 @@ it("handles connection failure", async () => {
 ```
 
 This pattern gives you complete control over HTTP behavior in tests without external dependencies.
+
+### Tips
+
+#### Debugging Unmatched Interceptors
+
+If interceptors aren't matching requests as expected, enable nock's debug mode to see exactly what requests are being made:
+
+```bash
+DEBUG=nock.* npm test
+```
+
+This will log all HTTP requests and show why interceptors aren't matching, helping you identify URL mismatches, missing headers, or incorrect HTTP methods.
+
+#### Persistent Stubs for Third-Party Polling
+
+Use `.persist()` to keep interceptors active across multiple requests, useful for third-party code that polls external services:
+
+```typescript
+before(() => {
+  nock('https://unleash.example.com')
+    .get('/api/client/features')
+    .reply(200, { features: [] })
+    .persist();
+});
+```
+
+This prevents tests from failing when libraries like Unleash poll for feature flags or configuration updates.
 
 ## Database Cleanup with Nuke
 
