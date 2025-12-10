@@ -1,0 +1,24 @@
+{
+  "name": "claude-marketplace",
+  "owner": {
+    "name": "Stephen Cresswell"
+  },
+  "metadata": {
+    "description": "Personal Claude Code plugin marketplace",
+    "version": "0.0.0"
+  },
+  "pluginRoot": "./plugins",
+  "plugins": [
+    {
+      "name": "macos-tools",
+      "source": "./macos-tools",
+      "version": "1.0.0",
+      "description": "macOS command line tools for improving Claude Code productivity",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["macos", "command-line-tools", "productivity"]
+    }
+  ]
+}
