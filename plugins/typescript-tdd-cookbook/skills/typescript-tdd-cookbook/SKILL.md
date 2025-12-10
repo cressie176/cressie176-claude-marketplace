@@ -111,20 +111,14 @@ import { equal as eq, ok } from 'node:assert/strict';
 import TestClient from './TestClient';
 import TestData from './TestData';
 
-it("creates company with specific details", async () => {
+it("creates company", async () => {
   const client = new TestClient('http://localhost:3000');
-
-  const data = TestData.company((draft) => {
-    draft.name = "Stark Industries";
-    draft.number = 1234;
-    draft.email = "tony@stark.com";
-  });
+  const data = TestData.company();
 
   const { status, body: created } = await client.createCompany(data);
 
   eq(status, 201);
   ok(created.id);
-  eq(created.name, "Stark Industries");
 });
 ```
 
