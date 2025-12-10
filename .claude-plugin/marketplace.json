@@ -19,6 +19,17 @@
       },
       "license": "MIT",
       "keywords": ["macos", "command-line-tools", "productivity"]
+    },
+    {
+      "name": "typescript-tdd-cookbook",
+      "source": "./typescript-tdd-cookbook",
+      "version": "1.0.0",
+      "description": "TDD pattern cookbook for TypeScript development",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["typescript", "tdd", "testing", "patterns", "cookbook"]
     }
   ]
 }

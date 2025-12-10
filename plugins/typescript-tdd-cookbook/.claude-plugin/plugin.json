@@ -1,0 +1,10 @@
+{
+  "name": "typescript-tdd-cookbook",
+  "version": "1.0.0",
+  "description": "TDD pattern cookbook for TypeScript development",
+  "author": {
+    "name": "Stephen Cresswell"
+  },
+  "license": "MIT",
+  "skills": ["./skills/typescript-tdd-cookbook"]
+}

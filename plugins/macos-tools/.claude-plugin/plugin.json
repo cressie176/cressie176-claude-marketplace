@@ -6,6 +6,5 @@
     "name": "Stephen Cresswell"
   },
   "license": "MIT",
-  "commands": ["./commands/install-macos-tools.md"],
-  "skills": ["./skills/typescript-tdd-cookbook"]
+  "commands": ["./commands/install-macos-tools.md"]
 }
