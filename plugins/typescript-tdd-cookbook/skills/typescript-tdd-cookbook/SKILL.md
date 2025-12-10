@@ -213,3 +213,96 @@ it("rejects invalid email from validator", async () => {
 ```
 
 This pattern makes error validation tests clear and maintainable.
+
+## Pattern 5: Mocking HTTP with Nock
+
+### Overview
+
+Testing code that makes HTTP requests without hitting real servers requires stubbing those requests. Nock intercepts HTTP calls at the Node.js level, allowing you to simulate successful responses, HTTP errors, timeouts, and connection failures without any network activity.
+
+### Key Benefits
+
+1. **Fast Tests**: No real network calls means instant test execution
+2. **Reliable Tests**: No dependency on external services or network conditions
+3. **Comprehensive Coverage**: Test error scenarios that are hard to reproduce in real environments
+
+### Required Dependencies
+
+```bash
+npm install -D nock
+```
+
+### Usage Examples
+
+#### Stub Successful HTTP Response
+
+```typescript
+import { equal as eq } from 'node:assert/strict';
+import nock from 'nock';
+
+it("fetches user data", async () => {
+  nock('https://api.example.com')
+    .get('/users/123')
+    .reply(200, { id: 123, name: 'Alice' });
+
+  const user = await userService.fetchUser(123);
+
+  eq(user.name, 'Alice');
+});
+```
+
+#### Stub HTTP Error Response
+
+```typescript
+import { equal as eq } from 'node:assert/strict';
+import nock from 'nock';
+
+it("handles 404 not found", async () => {
+  nock('https://api.example.com')
+    .get('/users/999')
+    .reply(404, { error: 'User not found' });
+
+  const result = await userService.fetchUser(999);
+
+  eq(result, null);
+});
+```
+
+#### Simulate Network Timeout
+
+```typescript
+import { rejects, match } from 'node:assert/strict';
+import nock from 'nock';
+
+it("handles request timeout", async () => {
+  nock('https://api.example.com')
+    .get('/users/123')
+    .delay(5000)
+    .reply(200, { id: 123 });
+
+  await rejects(() => userService.fetchUser(123), (err: Error) => {
+    match(err.message, /timeout/i);
+    return true;
+  });
+});
+```
+
+#### Simulate Connection Error
+
+```typescript
+import { rejects, match } from 'node:assert/strict';
+import nock from 'nock';
+
+it("handles connection failure", async () => {
+  nock('https://api.example.com')
+    .get('/users/123')
+    .replyWithError('ECONNREFUSED');
+
+  await rejects(() => userService.fetchUser(123), (err: Error) => {
+    match(err.message, /ECONNREFUSED/);
+    return true;
+  });
+});
+```
+
+This pattern gives you complete control over HTTP behavior in tests without external dependencies.
