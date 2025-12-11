@@ -7,11 +7,10 @@
     "description": "Personal Claude Code plugin marketplace",
     "version": "0.0.0"
   },
-  "pluginRoot": "./plugins",
   "plugins": [
     {
       "name": "macos-tools",
-      "source": "./macos-tools",
+      "source": "./plugins/macos-tools",
       "version": "1.2.0",
       "description": "macOS command line tools for improving Claude Code productivity",
       "author": {
@@ -22,7 +21,7 @@
     },
     {
       "name": "typescript-tdd-cookbook",
-      "source": "./typescript-tdd-cookbook",
+      "source": "./plugins/typescript-tdd-cookbook",
       "version": "1.0.0",
       "description": "TDD pattern cookbook for TypeScript development",
       "author": {
