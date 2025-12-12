@@ -155,6 +155,87 @@ Configuration files are loaded and merged in this order:
 - **Freeze configuration**: Use `Object.freeze()` to prevent accidental mutation
 - **Named environments**: It's fine to name environments explicitly (local, test, staging, production) rather than trying to be environment-agnostic
 
+## Docker Compose for Local Backing Services
+
+### Overview
+
+Use docker-compose to manage local backing services like databases, Redis, message queues, etc. This ensures consistent environments across developers and CI, eliminates "works on my machine" problems, and provides isolation between development and test databases.
+
+### Key Benefits
+
+1. **Consistent Environments**: All developers and CI have identical backing service versions
+2. **Fast Setup**: New developers run `docker-compose up` instead of installing databases
+3. **Isolation**: Development and test databases are completely separated
+4. **Version Control**: Infrastructure configuration lives alongside code
+5. **Easy Cleanup**: `docker-compose down -v` removes all data for fresh starts
+
+### Implementation
+
+Run separate database containers for development and tests. This provides complete isolation and allows both environments to run simultaneously.
+
+```yaml
+# docker-compose.yml
+services:
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: my-app-postgres-dev
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: my-app-postgres-test
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"  # Different host port
+    tmpfs:
+      - /var/lib/postgresql/data  # In-memory for faster tests
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-dev-data:
+```
+
+**Note**: Since each container is dedicated to a single application, it's fine to use the default `postgres` user and `postgres` database name. There's no need to create custom database names when you have complete container isolation.
+
+### npm Scripts Integration
+
+```json
+{
+  "scripts": {
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:reset": "docker-compose down -v && docker-compose up -d",
+    "docker:logs": "docker-compose logs -f"
+  }
+}
+```
+
+### Important Guidelines
+
+- **Use specific image versions**: Never use `latest` tag (e.g., `postgres:16-alpine`, not `postgres:latest`)
+- **Use tmpfs for test databases**: Speeds up tests significantly by keeping data in memory
+- **Include healthchecks**: Ensures containers are truly ready before app starts
+- **Map to different ports**: Development on 5432, test on 5433
+- **Version control docker-compose.yml**: Infrastructure as code
+- **Use volumes for development data**: Persists data across container restarts
+- **Container names**: Prefix with project name to avoid conflicts with other projects
+- **Complete isolation**: Dev and test can run simultaneously without interference
+
 ## Best Practice Factory Modules
 
 ### Overview
