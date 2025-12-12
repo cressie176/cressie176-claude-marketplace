@@ -13,9 +13,5 @@
     "code-quality",
     "maintainability"
   ],
-  "skills": [
-    {
-      "path": "./skills/typescript-clean-code"
-    }
-  ]
+  "skills": ["./skills/typescript-clean-code"]
 }

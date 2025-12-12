@@ -6,7 +6,5 @@
     "name": "Steve Cresswell"
   },
   "license": "MIT",
-  "skills": {
-    "postgresql-cookbook": "./skills/postgresql-cookbook/SKILL.md"
-  }
+  "skills": ["./skills/postgresql-cookbook"]
 }

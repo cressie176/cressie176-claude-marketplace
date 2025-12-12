@@ -13,9 +13,5 @@
     "dependencies",
     "best-practices"
   ],
-  "skills": [
-    {
-      "path": "./skills/javascript-preferred-libraries"
-    }
-  ]
+  "skills": ["./skills/javascript-preferred-libraries"]
 }
