@@ -561,3 +561,183 @@ it("emits user-created event", (done) => {
 ```
 
 This pattern prevents listener leaks and handles async setup cleanly.
+
+## Fast Tests and Low Timeouts
+
+### Overview
+
+Fast tests are essential for maintaining developer cadence. When tests run in seconds, developers run them constantly, catching bugs immediately. Slow tests break this feedback loop—developers run them less frequently, wait longer for results, and lose focus during the delay. Tests that run quickly after every small change enable the tight feedback cycle that makes TDD effective.
+
+### The Principle
+
+Tests should complete in seconds, not minutes. A healthy test suite runs hundreds of tests in under a minute. Individual tests normally complete in milliseconds to a few seconds. If a test approaches 10 seconds, something is fundamentally wrong—the test is likely waiting for something that never occurs rather than exercising real system behaviour.
+
+### Default Timeout Configuration
+
+Set a low default timeout (e.g., 3 seconds) to catch hanging tests immediately. This forces you to write fast, focused tests and quickly surfaces tests that are blocked or waiting indefinitely.
+
+Configure globally via CLI:
+
+```bash
+node --test --test-timeout=3000
+```
+
+Or in package.json:
+
+```json
+{
+  "scripts": {
+    "test": "node --test --test-timeout=3000"
+  }
+}
+```
+
+You can override the timeout for individual tests when needed:
+
+```typescript
+import { it } from 'node:test';
+
+it("long-running integration test", { timeout: 10000 }, async () => {
+  // This specific test gets 10 seconds
+});
+```
+
+### When Tests Time Out
+
+If a test times out:
+
+1. **Look at what it's doing**: Is it waiting for something that never happens?
+2. **Identify blocking operations**: Database queries, HTTP requests, event listeners, message queues
+3. **Speed it up reliably**: Fix the root cause without making the test flaky
+
+### Common Timeout Causes
+
+#### Waiting for Events That Never Fire
+
+```typescript
+// BAD: Test hangs if event never fires
+it("handles user created event", (done) => {
+  emitter.once('user-created', (user) => {
+    eq(user.name, 'Alice');
+    done();
+  });
+  // Bug: forgot to actually trigger the event
+});
+```
+
+**Fix:** Ensure the code that triggers the event is actually called, or check your event name matches.
+
+#### Polling for Database Changes
+
+```typescript
+// BAD: Test polls database repeatedly
+it("processes background job", async () => {
+  await jobQueue.enqueue(job);
+
+  // Polls every 100ms, waiting for job to complete
+  while (!(await job.isComplete())) {
+    await sleep(100);
+  }
+
+  eq(await job.status(), 'complete');
+});
+```
+
+**Fix:** Use a callback, promise, or event to signal completion rather than polling.
+
+#### Waiting for Locks That Never Release
+
+```typescript
+// BAD: Test waits for lock that's held by another test
+it("acquires exclusive lock", async () => {
+  await lockService.acquire('resource-123');
+  // Test times out if lock is still held from previous test
+});
+```
+
+**Fix:** Ensure locks are released in `afterEach()` or use test isolation.
+
+#### Unresolved Promises
+
+```typescript
+// BAD: Promise never resolves
+it("calls external service", async () => {
+  // Service is down but no timeout configured
+  await externalService.call();
+});
+```
+
+**Fix:** Configure timeouts on external calls or use stubs (nock) to avoid real network calls.
+
+### Speeding Up Tests Without Compromising Behaviour
+
+#### Use Test Doubles
+
+Replace slow external dependencies with fast in-memory alternatives:
+
+```typescript
+// Instead of real HTTP calls
+nock('https://api.example.com')
+  .get('/users/123')
+  .reply(200, { id: 123, name: 'Alice' });
+
+// Instead of real databases
+const testDatabase = new InMemoryDatabase();
+
+// Instead of real message queues
+const testQueue = new InMemoryQueue();
+```
+
+#### Use Docker Compose with tmpfs for Test Databases
+
+When you need real databases, use containers with in-memory storage:
+
+```yaml
+# docker-compose.yml
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    tmpfs:
+      - /var/lib/postgresql/data  # In-memory, much faster
+```
+
+#### Reduce Unnecessary Setup
+
+```typescript
+// BAD: Creates elaborate fixture for simple test
+beforeEach(async () => {
+  await createCompany();
+  await createUsers(100);
+  await seedProducts(500);
+});
+
+it("validates email format", () => {
+  eq(isValidEmail('test@example.com'), true);
+});
+
+// GOOD: Only create what you need
+it("validates email format", () => {
+  eq(isValidEmail('test@example.com'), true);
+});
+```
+
+### Warning Signs
+
+Tests that take more than 10 seconds are almost always waiting for something that never occurs:
+
+- **Event listeners**: Listening for events that are never emitted
+- **Message queues**: Waiting for messages that never arrive
+- **Database changes**: Polling for updates that never happen
+- **Network timeouts**: Waiting for responses from dead services
+- **Locks or semaphores**: Waiting for resources that are never released
+
+When you see a 10+ second test timeout, investigate immediately—it's revealing a bug in the test or the code under test.
+
+### Guidelines
+
+- **Set low default timeouts**: 3 seconds catches most problems quickly
+- **Investigate timeouts immediately**: They reveal bugs or poor test design
+- **Use test doubles**: Stub external dependencies to keep tests fast
+- **Fix root causes**: Don't just increase timeouts to mask problems
+- **Run tests constantly**: Fast tests enable tight feedback loops
+- **Tests taking > 10 seconds are wrong**: They're waiting for something that never happens
