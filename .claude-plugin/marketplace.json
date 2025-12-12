@@ -29,6 +29,50 @@
       },
       "license": "MIT",
       "keywords": ["typescript", "tdd", "testing", "patterns", "cookbook"]
+    },
+    {
+      "name": "typescript-service-cookbook",
+      "source": "./plugins/typescript-service-cookbook",
+      "version": "1.0.0",
+      "description": "Service design pattern cookbook for TypeScript development",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["typescript", "services", "patterns", "cookbook", "architecture"]
+    },
+    {
+      "name": "javascript-preferred-libraries",
+      "source": "./plugins/javascript-preferred-libraries",
+      "version": "1.0.0",
+      "description": "Preferred JavaScript/TypeScript libraries and frameworks to use (and avoid) when generating code",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["javascript", "typescript", "libraries", "dependencies", "best-practices"]
+    },
+    {
+      "name": "typescript-clean-code-cookbook",
+      "source": "./plugins/typescript-clean-code-cookbook",
+      "version": "1.0.0",
+      "description": "Clean code principles and best practices for TypeScript development",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["typescript", "clean-code", "best-practices", "code-quality", "maintainability"]
+    },
+    {
+      "name": "postgresql-cookbook",
+      "source": "./plugins/postgresql-cookbook",
+      "version": "1.0.0",
+      "description": "PostgreSQL patterns and best practices cookbook",
+      "author": {
+        "name": "Stephen Cresswell"
+      },
+      "license": "MIT",
+      "keywords": ["postgresql", "database", "patterns", "cookbook", "sql"]
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "name": "typescript-service-cookbook",
+  "version": "1.0.0",
+  "description": "Service design pattern cookbook for TypeScript development",
+  "author": {
+    "name": "Stephen Cresswell"
+  },
+  "license": "MIT",
+  "skills": ["./skills/typescript-service-cookbook"]
+}

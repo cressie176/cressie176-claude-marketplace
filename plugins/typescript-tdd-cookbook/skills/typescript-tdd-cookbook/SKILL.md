@@ -178,7 +178,7 @@ it("creates company", async () => {
 });
 ```
 
-The test client abstracts HTTP complexity while tests focus on behavior and assertions.
+The test client abstracts HTTP complexity while tests focus on behaviour and assertions.
 
 ## Controlling Time in Tests
 
@@ -385,7 +385,7 @@ it("handles connection failure", async () => {
 });
 ```
 
-This pattern gives you complete control over HTTP behavior in tests without external dependencies.
+This pattern gives you complete control over HTTP behaviour in tests without external dependencies.
 
 ### Tips
 
@@ -436,7 +436,7 @@ Integration tests that write to databases need clean state between runs. Rather 
 DO $$
 BEGIN
   -- Only create nuke function if explicitly enabled
-  IF current_setting('allow_nuke', true) = 'true' THEN
+  IF current_setting('app.allow_nuke', true) = 'true' THEN
     CREATE OR REPLACE FUNCTION nuke_data()
     RETURNS void
     LANGUAGE plpgsql
@@ -456,6 +456,7 @@ BEGIN
 
       -- Truncate all tables if any exist
       IF table_names IS NOT NULL THEN
+        RAISE NOTICE 'Nuking tables: %', table_names;      
         EXECUTE 'TRUNCATE ' || table_names || ' RESTART IDENTITY CASCADE';
       END IF;
 
@@ -509,7 +510,7 @@ describe("UserService", () => {
       database: 'myapp_test',
       user: 'test_user',
       password: 'test_password',
-      options: '-c allow_nuke=true'
+      options: '-c app.allow_nuke=true'
     });
     await database.start();
   });

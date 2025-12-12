@@ -1,0 +1,12 @@
+{
+  "name": "postgresql-cookbook",
+  "version": "1.0.0",
+  "description": "PostgreSQL patterns and best practices cookbook",
+  "author": {
+    "name": "Steve Cresswell"
+  },
+  "license": "MIT",
+  "skills": {
+    "postgresql-cookbook": "./skills/postgresql-cookbook/SKILL.md"
+  }
+}

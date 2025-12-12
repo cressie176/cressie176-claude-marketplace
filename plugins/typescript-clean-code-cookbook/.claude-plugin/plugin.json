@@ -1,0 +1,21 @@
+{
+  "name": "typescript-clean-code-cookbook",
+  "version": "1.0.0",
+  "description": "Clean code principles and best practices for TypeScript development",
+  "author": {
+    "name": "Steve Cresswell"
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "clean-code",
+    "best-practices",
+    "code-quality",
+    "maintainability"
+  ],
+  "skills": [
+    {
+      "path": "./skills/typescript-clean-code"
+    }
+  ]
+}

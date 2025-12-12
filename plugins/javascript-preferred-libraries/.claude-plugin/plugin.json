@@ -1,0 +1,21 @@
+{
+  "name": "javascript-preferred-libraries",
+  "version": "1.0.0",
+  "description": "Preferred JavaScript/TypeScript libraries and frameworks to use (and avoid) when generating code",
+  "author": {
+    "name": "Steve Cresswell"
+  },
+  "license": "MIT",
+  "keywords": [
+    "javascript",
+    "typescript",
+    "libraries",
+    "dependencies",
+    "best-practices"
+  ],
+  "skills": [
+    {
+      "path": "./skills/javascript-preferred-libraries"
+    }
+  ]
+}
