@@ -12,6 +12,19 @@ This skill provides guidance on library selection for JavaScript and TypeScript 
 - Making architectural decisions about technology choices
 - Reviewing existing dependencies
 
+## CRITICAL: Install Libraries Only When Actually Needed
+
+**DO NOT install libraries preemptively or "just in case". Only install when:**
+- The current task explicitly requires the library's functionality
+- You are actively writing code that uses the library
+- The user has explicitly requested the library be added
+
+**NEVER:**
+- Install libraries for potential future use
+- Add dependencies for features not currently being implemented
+- Suggest installing multiple alternatives "to have them available"
+- Install libraries without an immediate, concrete use case
+
 ## CRITICAL: Respect Existing Project Preferences
 
 **BEFORE suggesting any libraries from this skill, you MUST:**
