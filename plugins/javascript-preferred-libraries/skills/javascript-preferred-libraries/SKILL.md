@@ -12,6 +12,27 @@ This skill provides guidance on library selection for JavaScript and TypeScript 
 - Making architectural decisions about technology choices
 - Reviewing existing dependencies
 
+## CRITICAL: Respect Existing Project Preferences
+
+**BEFORE suggesting any libraries from this skill, you MUST:**
+
+1. **Check package.json** - If the project already has alternative libraries installed for the same purpose, use those instead of suggesting preferences from this skill
+2. **Check CLAUDE.md files** - Look for library preferences in:
+   - User's global `~/.claude/CLAUDE.md`
+   - Project's `CLAUDE.md`
+   - Any other project-specific configuration files
+3. **Check other configuration** - Look for preferences in project documentation, ADRs (Architecture Decision Records), or other relevant files
+
+**Only suggest libraries from this skill when:**
+- No alternative library is currently in use for that purpose
+- No preference is specified in more specific configuration (CLAUDE.md, project docs, etc.)
+- The project explicitly asks for recommendations or is starting fresh
+
+**If existing preferences conflict with this skill:**
+- Respect and use the project's existing choices
+- DO NOT suggest replacing them unless explicitly asked
+- The project's choices take precedence over this skill's preferences
+
 ## Library Preferences by Category
 
 ### HTTP Server
