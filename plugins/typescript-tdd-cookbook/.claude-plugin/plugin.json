@@ -1,6 +1,6 @@
 {
   "name": "typescript-tdd-cookbook",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TDD pattern cookbook for TypeScript development",
   "author": {
     "name": "Stephen Cresswell"

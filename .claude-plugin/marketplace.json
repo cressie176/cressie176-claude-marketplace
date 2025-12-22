@@ -11,7 +11,7 @@
     {
       "name": "macos-tools",
       "source": "./plugins/macos-tools",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "description": "macOS command line tools for improving Claude Code productivity",
       "author": {
         "name": "Stephen Cresswell"
@@ -22,7 +22,7 @@
     {
       "name": "typescript-tdd-cookbook",
       "source": "./plugins/typescript-tdd-cookbook",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "TDD pattern cookbook for TypeScript development",
       "author": {
         "name": "Stephen Cresswell"
@@ -33,7 +33,7 @@
     {
       "name": "typescript-service-cookbook",
       "source": "./plugins/typescript-service-cookbook",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Service design pattern cookbook for TypeScript development",
       "author": {
         "name": "Stephen Cresswell"
@@ -44,7 +44,7 @@
     {
       "name": "javascript-preferred-libraries",
       "source": "./plugins/javascript-preferred-libraries",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Preferred JavaScript/TypeScript libraries and frameworks to use (and avoid) when generating code",
       "author": {
         "name": "Stephen Cresswell"
@@ -55,7 +55,7 @@
     {
       "name": "typescript-clean-code-cookbook",
       "source": "./plugins/typescript-clean-code-cookbook",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Clean code principles and best practices for TypeScript development",
       "author": {
         "name": "Stephen Cresswell"
@@ -66,7 +66,7 @@
     {
       "name": "postgresql-cookbook",
       "source": "./plugins/postgresql-cookbook",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "PostgreSQL patterns and best practices cookbook",
       "author": {
         "name": "Stephen Cresswell"
@@ -77,7 +77,7 @@
     {
       "name": "typescript-pragmatic-programmer",
       "source": "./plugins/typescript-pragmatic-programmer",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "Pragmatic programming principles applied to TypeScript development",
       "author": {
         "name": "Stephen Cresswell"

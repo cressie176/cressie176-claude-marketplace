@@ -1,6 +1,6 @@
 {
   "name": "javascript-preferred-libraries",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Preferred JavaScript/TypeScript libraries and frameworks to use (and avoid) when generating code",
   "author": {
     "name": "Steve Cresswell"
