@@ -469,13 +469,16 @@ END;
 $$;
 ```
 
-#### Database Wrapper Class
+#### Database Classes
+
+First, your production Database class:
 
 ```typescript
+// src/Database.ts
 import { Pool } from 'pg';
 
 export default class Database {
-  private pool: Pool;
+  protected pool: Pool;
 
   constructor(config: any) {
     this.pool = new Pool(config);
@@ -488,7 +491,16 @@ export default class Database {
   async stop(): Promise<void> {
     await this.pool.end();
   }
+}
+```
 
+Then create a TestDatabase subclass that adds the `nuke()` method:
+
+```typescript
+// test/TestDatabase.ts
+import Database from '../src/Database';
+
+export default class TestDatabase extends Database {
   async nuke(): Promise<void> {
     await this.pool.query('SELECT nuke_data()');
   }
@@ -499,13 +511,13 @@ export default class Database {
 
 ```typescript
 import { describe, it, before, beforeEach, after } from 'node:test';
-import Database from '../src/Database';
+import TestDatabase from './TestDatabase';
 
 describe("UserService", () => {
-  let database: Database;
+  let database: TestDatabase;
 
   before(async () => {
-    database = new Database({
+    database = new TestDatabase({
       host: 'localhost',
       database: 'myapp_test',
       user: 'test_user',
