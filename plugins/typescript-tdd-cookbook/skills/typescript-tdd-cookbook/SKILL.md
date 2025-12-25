@@ -574,6 +574,46 @@ it("emits user-created event", (done) => {
 
 This pattern prevents listener leaks and handles async setup cleanly.
 
+## Suppressing Expected Error Logs
+
+### Overview
+
+When testing unhappy paths—invalid inputs, authorisation failures, missing resources—your code often logs errors to help debug production issues. But in tests, these expected errors pollute console output, confusing developers who can't distinguish between real failures and intentional test behaviour. This becomes especially problematic when joining a new codebase: running tests and seeing error logs destroys confidence. You can't know if those errors indicate genuine bugs or are just testing error paths. The solution is to suppress expected error logs during tests whilst preserving unexpected ones.
+
+### Key Benefits
+
+1. **Clear Test Output**: Console shows only genuine failures, not expected error paths
+2. **Developer Confidence**: New team members can trust a green test run
+3. **Signal vs Noise**: Real bugs stand out instead of being buried in expected errors
+
+### Implementation Approach
+
+Most structured logging libraries provide built-in mechanisms to control log output dynamically without modifying production code. Rather than adding conditional statements to your logger or creating mocks and stubs, leverage your logger's native capabilities to adjust log levels during tests.
+
+For example, with **pino** you can temporarily silence logging by changing the log level:
+
+```typescript
+logger.level('silent');
+```
+
+With **winston**, you can similarly adjust the log level:
+
+```typescript
+logger.level = 'silent';
+```
+
+Other common loggers like **bunyan**, **log4js**, and **consola** offer equivalent functionality. The key principle is to use your logger's existing API to control output rather than wrapping it in test-specific conditionals or replacing it with test doubles.
+
+This approach keeps your production code clean and free from test-specific logic. You simply configure the logger instance in your test setup to suppress expected errors, then restore the original level afterwards.
+
+### Guidelines
+
+- **Use logger's built-in level control**: Prefer `logger.level('silent')` over mocking or conditional logic
+- **Suppress temporarily**: Set silent level before testing error paths, restore afterwards
+- **Restore reliably**: Use try-finally or test framework hooks to guarantee restoration
+- **Avoid production code changes**: Don't add `if (NODE_ENV === 'test')` conditionals to your logger
+- **Test the error**: Don't just suppress and ignore—assert the error occurred
+
 ## Fast Tests and Low Timeouts
 
 ### Overview
