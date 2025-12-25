@@ -29,7 +29,7 @@ Node's built-in test framework and assertion library are more than adequate for 
 
 ```typescript
 import { describe, it, before, beforeEach, after } from 'node:test';
-import { equal as eq, ok, rejects, match } from 'node:assert/strict';
+import { equal as eq, notEqual as neq, ok, rejects, match } from 'node:assert/strict';
 ```
 
 #### Prefer Multiple Assertions Over Deep Equality
