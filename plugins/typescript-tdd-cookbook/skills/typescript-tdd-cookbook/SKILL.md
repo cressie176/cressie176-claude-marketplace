@@ -793,3 +793,29 @@ When you see a 10+ second test timeout, investigate immediately—it's revealing
 - **Fix root causes**: Don't just increase timeouts to mask problems
 - **Run tests constantly**: Fast tests enable tight feedback loops
 - **Tests taking > 10 seconds are wrong**: They're waiting for something that never happens
+
+## Avoid Concurrent Testing with Databases or Servers
+
+### Overview
+
+Node's test framework runs tests concurrently by default. **Disable concurrency when tests use databases or web servers.** Concurrent execution causes race conditions, port conflicts, and flaky tests. The speed boost is minimal (database I/O is the bottleneck) and not worth the debugging complexity.
+
+### Disable Concurrency
+
+Configure in `package.json`:
+
+```json
+{
+  "scripts": {
+    "test": "node --test --test-concurrency=1"
+  }
+}
+```
+
+Or via CLI:
+
+```bash
+node --test --test-concurrency=1
+```
+
+Sequential execution prevents resource conflicts and makes tests reliable. Only use concurrent testing for pure business logic with no shared state.
