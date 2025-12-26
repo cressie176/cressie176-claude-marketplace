@@ -68,6 +68,69 @@ users.find(id);       // Not users.findUser(id)
 
 **Exception:** `any` may be acceptable when integrating with poorly-typed third-party libraries, but immediately wrap it with properly typed code.
 
+**Prefer explicit type definitions over inline typing:**
+
+- Define types or interfaces separately for complex parameter types
+- Inline types make function signatures unwieldy and hard to read
+- Separate type definitions improve reusability and maintainability
+- Use inline types only for very simple cases (primitives, single-property objects)
+
+**Good (explicit type definitions):**
+```typescript
+interface CreateUserParams {
+  name: string;
+  email: string;
+  age: number;
+  preferences: {
+    newsletter: boolean;
+    notifications: boolean;
+  };
+}
+
+function createUser(params: CreateUserParams): User {
+  // Implementation
+}
+
+// Type is reusable and testable
+const userData: CreateUserParams = {
+  name: 'John',
+  email: 'john@example.com',
+  age: 30,
+  preferences: {
+    newsletter: true,
+    notifications: false
+  }
+};
+```
+
+**Bad (inline typing makes signature unwieldy):**
+```typescript
+function createUser(params: {
+  name: string;
+  email: string;
+  age: number;
+  preferences: {
+    newsletter: boolean;
+    notifications: boolean;
+  };
+}): User {
+  // Implementation
+}
+
+// Cannot reuse the type, harder to test
+```
+
+**Good (inline typing for simple cases):**
+```typescript
+function calculateTotal(items: { price: number }[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+function greet(user: { name: string }): string {
+  return `Hello, ${user.name}`;
+}
+```
+
 **Good (explicit types):**
 ```typescript
 interface User {

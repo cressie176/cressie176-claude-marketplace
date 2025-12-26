@@ -81,6 +81,7 @@ await application.start();
 
 **Important Guidelines:**
 
+- **Dependency injection must start from the application entry point** - The entry point (e.g., `index.ts` or `main.ts`) is responsible for constructing all dependencies and wiring them together. This is a fundamental requirement. Instantiating dependencies anywhere other than the entry point undermines the architecture and prevents proper testing, configuration management, and component reusability.
 - Inject all major dependencies (config, database, server, etc.) via constructor
 - Constructor should only assign dependencies, never perform I/O or async operations
 - All I/O and async initialization happens in `start()`
