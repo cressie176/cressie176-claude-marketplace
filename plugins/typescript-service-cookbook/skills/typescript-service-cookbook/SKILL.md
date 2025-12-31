@@ -528,43 +528,59 @@ export default function createRoutes(database: Database) {
 
 ### Overview
 
-Define domain-specific error classes that carry structured details, then handle them centrally with a single error handler. This separates error creation (throw anywhere) from error presentation (handle once), making error handling consistent across the application.
+Define fine-grained domain-specific error classes that express business problems, independent of HTTP concerns. A centralized error handler then maps these domain errors to appropriate HTTP errors with status codes. This strict separation ensures domain logic remains decoupled from transport layer concerns.
 
 ### Key Benefits
 
-1. **Consistent Error Responses**: All errors of the same type produce identical response format
-2. **Type-Safe Error Details**: TypeScript ensures error details are correctly structured
-3. **Single Source of Truth**: One place to change error handling for entire application
-4. **Clean Service Code**: Services throw errors, don't concern themselves with HTTP responses
+1. **Domain Independence**: Business logic knows nothing about HTTP status codes
+2. **Fine-Grained Errors**: Express precise domain problems (ValidationError, KeyCollisionError, MissingEntityError)
+3. **Single Mapping Point**: One place to define how domain errors translate to HTTP responses
+4. **Type-Safe Error Details**: TypeScript ensures error details are correctly structured
+5. **Reusable Domain Errors**: Same errors work across HTTP, CLI, message queues, etc.
 
 ### Implementation
 
 ```typescript
-// src/errors/ValidationError.ts
+// src/errors/domain/ValidationError.ts
 export default class ValidationError extends Error {
-  public code: string;
-
   constructor(public details: any) {
     super("Validation failed");
     this.name = "ValidationError";
-    this.code = "TP_VALIDATION_ERROR";
   }
 }
 
-// src/errors/BadRequestError.ts
-export default class BadRequestError extends Error {
-  constructor(message: string) {
+// src/errors/domain/KeyCollisionError.ts
+export default class KeyCollisionError extends Error {
+  constructor(public key: string) {
+    super(`Resource with key '${key}' already exists`);
+    this.name = "KeyCollisionError";
+  }
+}
+
+// src/errors/domain/MissingEntityError.ts
+export default class MissingEntityError extends Error {
+  constructor(public entityType: string, public id: string) {
+    super(`${entityType} with id '${id}' not found`);
+    this.name = "MissingEntityError";
+  }
+}
+
+// src/errors/http/HttpError.ts
+export default class HttpError extends Error {
+  constructor(
+    public statusCode: number,
+    message: string,
+    public details?: any
+  ) {
     super(message);
-    this.name = 'BadRequestError';
+    this.name = "HttpError";
   }
 }
 
-// src/routes/index.ts
-export default function createRoutes(database: Database) {
-  const app = new Hono();
-
-  // Centralized error handler
-  app.onError((error, c) => {
+// src/middleware/errorHandler.ts
+export default function createErrorHandler() {
+  return (error: Error, c: Context) => {
+    // Map domain errors to HTTP errors
     if (error instanceof ValidationError) {
       return c.json({
         error: "Validation failed",
@@ -572,13 +588,36 @@ export default function createRoutes(database: Database) {
       }, 400);
     }
 
-    if (error instanceof BadRequestError) {
-      return c.json({ error: error.message }, 400);
+    if (error instanceof KeyCollisionError) {
+      return c.json({
+        error: error.message
+      }, 409);
     }
 
+    if (error instanceof MissingEntityError) {
+      return c.json({
+        error: error.message
+      }, 404);
+    }
+
+    if (error instanceof HttpError) {
+      return c.json({
+        error: error.message,
+        details: error.details
+      }, error.statusCode);
+    }
+
+    // Unmapped errors become internal server errors
     logger.error("Unhandled error", error);
     return c.json({ error: "Internal server error" }, 500);
-  });
+  };
+}
+
+// src/routes/index.ts
+export default function createRoutes(database: Database) {
+  const app = new Hono();
+
+  app.onError(createErrorHandler());
 
   return app;
 }
@@ -587,7 +626,7 @@ export default function createRoutes(database: Database) {
 ### Usage
 
 ```typescript
-// Services throw domain errors
+// Services throw fine-grained domain errors
 export class UserService {
   async createUser(data: unknown) {
     const result = CreateUserSchema.safeParse(data);
@@ -596,20 +635,34 @@ export class UserService {
     }
 
     if (await this.userExists(result.data.email)) {
-      throw new BadRequestError('User already exists');
+      throw new KeyCollisionError(result.data.email);
     }
 
     return this.database.users.create(result.data);
+  }
+
+  async getUser(id: string): Promise<User> {
+    const user = await this.database.users.findById(id);
+
+    if (!user) {
+      throw new MissingEntityError('User', id);
+    }
+
+    return user;
   }
 }
 ```
 
 **Important Guidelines:**
 
-- **Include error codes**: Makes it easier for clients to handle errors programmatically
+- **Domain errors are HTTP-agnostic**: Never include status codes or HTTP concepts in domain errors
+- **Fine-grained domain errors**: Create specific error types for each distinct domain problem
+- **Single mapping point**: The error handler middleware is the only place that knows about HTTP status codes
+- **Unmapped errors are 500s**: Any domain error without an explicit mapping becomes an internal server error
+- **Include error codes**: Add code properties for programmatic client handling
 - **Structure validation details**: Use consistent format (Zod's error format works well)
 - **Log unexpected errors**: Always log errors you don't recognize
-- **Don't expose internals**: Generic message for unhandled errors to avoid leaking implementation details
+- **Don't expose internals**: Generic message for unmapped errors to avoid leaking implementation details
 
 ## Event-Driven Logging Bridge
 

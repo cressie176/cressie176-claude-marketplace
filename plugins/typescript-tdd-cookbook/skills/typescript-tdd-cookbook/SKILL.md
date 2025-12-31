@@ -180,6 +180,53 @@ it("creates company", async () => {
 
 The test client abstracts HTTP complexity while tests focus on behaviour and assertions.
 
+## Asserting HTML Content with Cheerio
+
+### Overview
+
+Integration tests that assert HTML responses often resort to fragile string matching or unwieldy regular expressions. This makes tests brittle—small markup changes like reordering attributes or adding whitespace break unrelated tests. Cheerio provides a jQuery-like API for parsing and querying HTML, letting you assert the structure and content you care about without coupling to irrelevant formatting details.
+
+### Key Benefits
+
+1. **Resilient Assertions**: Query by selectors instead of matching exact strings
+2. **Expressive Tests**: Tests read like "find the heading and check its text" rather than regex gymnastics
+3. **Easy Navigation**: Traverse DOM structure naturally to find deeply nested elements
+
+### Required Dependencies
+
+```bash
+npm install -D cheerio
+```
+
+### Usage Examples
+
+```typescript
+// BAD: Brittle string matching breaks with whitespace or attribute changes
+it("renders company name", async () => {
+  const client = new TestClient('http://localhost:3000');
+  const { body } = await client.getCompanyPage('123');
+
+  ok(body.includes('<h1 class="company-name">Stark Industries</h1>'));
+  ok(body.match(/<button.*data-company-id="123".*>Delete Company<\/button>/));
+});
+
+// GOOD: Cheerio makes assertions resilient to formatting changes
+import { equal as eq, ok } from 'node:assert/strict';
+import { load } from 'cheerio';
+
+it("renders company name and delete button", async () => {
+  const client = new TestClient('http://localhost:3000');
+  const { body } = await client.getCompanyPage('123');
+
+  const $ = load(body);
+
+  eq($('h1.company-name').text().trim(), 'Stark Industries');
+  eq($('button[data-company-id="123"]').text().trim(), 'Delete Company');
+});
+```
+
+This pattern makes HTML assertion tests clear, maintainable, and resilient to markup changes.
+
 ## Controlling Time in Tests
 
 ### Overview
