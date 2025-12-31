@@ -376,10 +376,8 @@ export default class Database {
       logger.error("Database pool error", error);
     });
 
-    // Attach notice handler to each acquired client
-    this.pool.on("acquire", (client) => {
-      if (client.listenerCount("notice") > 0) return;
-
+    // Attach notice handler when new clients connect
+    this.pool.on("connect", (client) => {
       client.on("notice", (notice) => {
         const { message = "Database notice", severity = "NOTICE", ...params } = notice;
         const logLevel = this.severityMap[severity?.toUpperCase()] || "info";
@@ -392,7 +390,7 @@ export default class Database {
 
 ### Best Practices
 
-1. **Check for existing listeners**: Prevent duplicate handlers with `listenerCount()` check
+1. **Use the "connect" event**: Attach handlers when clients are physically created, not on each checkout
 2. **Map severities consistently**: Use an object map for PostgreSQL severities to log levels
 3. **Handle both pool and client errors**: Listen on pool for idle client errors
 4. **Include notice metadata**: Pass through additional fields from notice object
