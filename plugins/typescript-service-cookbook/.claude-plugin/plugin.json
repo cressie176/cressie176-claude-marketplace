@@ -1,6 +1,6 @@
 {
   "name": "typescript-service-cookbook",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Service design pattern cookbook for TypeScript development",
   "author": {
     "name": "Stephen Cresswell"
