@@ -8,6 +8,88 @@ allowed-tools: Read, Grep, Glob, Edit, Write
 
 This cookbook provides proven PostgreSQL patterns and best practices for common database operations.
 
+## Comments
+
+### Overview
+
+SQL is less expressive than many programming languages, so comments may be more acceptable than in application code. However, they should still be used judiciously and never as a substitute for clear code.
+
+### When Comments Are Acceptable
+
+Comments may be useful in:
+
+1. **Complex stored procedures**: When procedural logic requires explanation
+2. **Non-obvious query logic**: When a query uses clever optimizations or workarounds
+
+### When to Avoid Comments
+
+**Never use comments when:**
+
+1. **Queries are already simple**: Self-explanatory queries don't need explanation
+2. **For visual separation**: Never use comments to visually separate logical blocks - break into smaller functions instead
+3. **Describing what the code does**: Comments should explain *why*, not *what*
+
+### Pattern
+
+**Good (explains non-obvious why):**
+```sql
+-- Using LEFT JOIN instead of NOT EXISTS because the query planner
+-- generates a more efficient plan for this table size (see issue #234)
+SELECT u.user_id, u.email
+FROM users u
+LEFT JOIN deleted_users d ON u.user_id = d.user_id
+WHERE d.user_id IS NULL;
+
+CREATE OR REPLACE FUNCTION process_user_orders(p_user_id BIGINT)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- Must lock user record first to prevent race condition with concurrent
+  -- order updates (documented in issue #456)
+  PERFORM * FROM users WHERE user_id = p_user_id FOR UPDATE;
+
+  UPDATE orders
+  SET processed = true
+  WHERE user_id = p_user_id;
+END;
+$$;
+```
+
+**Bad (stating the obvious):**
+```sql
+-- Select users
+SELECT * FROM users;
+
+-- Join orders with users
+SELECT u.email, o.total
+FROM users u
+INNER JOIN orders o ON u.user_id = o.user_id;
+
+-- ---------------------------------
+-- Process Orders Section
+-- ---------------------------------
+UPDATE orders SET status = 'processed';
+```
+
+**Better (no comments needed for simple queries):**
+```sql
+SELECT * FROM users;
+
+SELECT u.email, o.total
+FROM users u
+INNER JOIN orders o ON u.user_id = o.user_id;
+
+UPDATE orders SET status = 'processed';
+```
+
+### Best Practices
+
+1. **Prefer clear SQL over comments**: Use meaningful table/column names and break complex queries into CTEs
+2. **Comment the why, not the what**: Explain reasoning, not mechanics
+3. **Never use for visual separation**: Extract into separate functions instead
+4. **Keep simple queries comment-free**: Don't add noise to straightforward SQL
+
 ## Naming Conventions
 
 ### Overview

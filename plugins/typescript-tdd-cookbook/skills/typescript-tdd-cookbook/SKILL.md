@@ -44,7 +44,63 @@ it("creates user with correct properties", () => {
 });
 ```
 
-Deep equality assertions make failures harder to debug because you can't immediately see which property failed. Multiple `eq()` calls are clearer and pinpoint failures precisely. Use `ok()` for unpredictable values like generated IDs, and `eq()` for everything else.
+Deep equality assertions make failures harder to debug because you can't immediately see which property failed. Multiple `eq()` calls are clearer and pinpoint failures precisely.
+
+**Prefer `eq()` for predictable values:**
+- Use `eq()` when the value is deterministic and predictable
+- Only use `ok()` for truly unpredictable values like generated IDs or timestamps
+- Only use `match()` for especially long strings or strings with unpredictable parts (e.g., timestamps, random IDs embedded in messages)
+
+**Good (using eq for predictable values):**
+```typescript
+it("validates email format", () => {
+  const result = validateEmail('invalid-email');
+  eq(result.valid, false);
+  eq(result.error, 'Email must contain @ symbol');
+});
+
+it("generates welcome message", () => {
+  const message = generateWelcome('Alice');
+  eq(message, 'Welcome to the platform, Alice!');
+});
+```
+
+**Acceptable (using ok for unpredictable values):**
+```typescript
+it("generates unique user ID", () => {
+  const user = createUser({ name: 'Alice' });
+  ok(user.id);
+  eq(user.name, 'Alice');
+});
+```
+
+**Acceptable (using match for long or partially unpredictable strings):**
+```typescript
+it("logs error with timestamp", () => {
+  const log = logger.error('Database connection failed');
+  match(log, /\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] ERROR: Database connection failed/);
+});
+
+it("generates detailed error report", () => {
+  const report = generateErrorReport(error);
+  match(report, /Error Code: ERR_DB_CONNECTION/);
+  match(report, /Stack trace:/);
+});
+```
+
+**Bad (using ok or match for predictable values):**
+```typescript
+it("validates email format", () => {
+  const result = validateEmail('invalid-email');
+  ok(!result.valid);
+  match(result.error, /symbol/);
+});
+
+it("generates welcome message", () => {
+  const message = generateWelcome('Alice');
+  match(message, /Welcome.*Alice/);
+});
+```
 
 **Avoid Fluent APIs**: Libraries with `.not.toBe()` or `.toHaveProperty()` chains add visual noise. Compare:
 

@@ -458,6 +458,7 @@ function setUserStatus(user: User, activate: boolean): void {
 - Comments explain why code exists, not what it does
 - Prefer self-explanatory code over comments
 - Code should be readable enough that comments aren't needed
+- Never use comments for visual separation of logical code blocks - extract code blocks into functions instead (unless the method is already very small)
 
 **Valid reasons for comments:**
 - Referencing a bug or issue
@@ -498,6 +499,117 @@ counter++;
 activeUsers.forEach(sendEmail);
 
 counter++;
+```
+
+## Blank Lines
+
+**Blank lines should not be used for visual separation within functions:**
+
+- Blank lines within functions suggest logical blocks that should be extracted into separate functions
+- If you feel the need to separate code with blank lines, extract it into well-named functions instead
+- Keep functions small enough that visual separation isn't necessary
+- **Exception**: In unit tests, blank lines may separate setup, execution, and assertion blocks, but only when those blocks contain multiple lines
+
+**In production code:**
+
+**Bad (blank lines separating logical blocks in route handler):**
+```typescript
+app.get('/users', (req, res) => {
+  const limit = parseInt(req.query.limit as string) || 10;
+
+  const users = userService.getUsers(limit);
+
+  res.json(users);
+});
+```
+
+**Good (no blank lines needed for simple flow):**
+```typescript
+app.get('/users', (req, res) => {
+  const limit = parseInt(req.query.limit as string) || 10;
+  const users = userService.getUsers(limit);
+  res.json(users);
+});
+```
+
+**Bad (blank lines suggest missing function extraction):**
+```typescript
+function processOrder(order: Order): void {
+  const total = order.items.reduce((sum, item) => sum + item.price, 0);
+  const tax = total * 0.1;
+  const finalAmount = total + tax;
+
+  const payment = stripe.charges.create({ amount: finalAmount });
+  order.paymentId = payment.id;
+
+  emailService.send(order.userEmail, generateReceipt(order));
+  logger.info('Order processed', { orderId: order.id });
+}
+```
+
+**Good (extract logical blocks into functions):**
+```typescript
+function processOrder(order: Order): void {
+  const finalAmount = calculateOrderTotal(order);
+  const paymentId = processPayment(finalAmount);
+  sendOrderConfirmation(order, paymentId);
+}
+```
+
+**In unit tests:**
+
+**Bad (unnecessary blank lines for trivial single-line sections):**
+```typescript
+it('calculates total correctly', () => {
+  const cart = new ShoppingCart();
+
+  cart.addItem({ price: 100 });
+
+  eq(cart.getTotal(), 100);
+});
+```
+
+**Good (no blank lines needed for simple test):**
+```typescript
+it('calculates total correctly', () => {
+  const cart = new ShoppingCart();
+  cart.addItem({ price: 100 });
+  eq(cart.getTotal(), 100);
+});
+```
+
+**Good (blank lines appropriate for multi-line setup and assertions):**
+```typescript
+it('applies discount to premium users with large orders', () => {
+  const cart = new ShoppingCart();
+  cart.addItem({ price: 100 });
+  cart.addItem({ price: 50 });
+  const user = { isPremium: true };
+
+  const discount = cart.calculateDiscount(user);
+
+  eq(discount, 15);
+  eq(cart.getTotal(), 135);
+  eq(cart.items.length, 2);
+  ok(user.isPremium);
+  eq(cart.discountApplied, true);
+});
+```
+
+**Bad (multi-line sections without separation are hard to parse):**
+```typescript
+it('applies discount to premium users with large orders', () => {
+  const cart = new ShoppingCart();
+  cart.addItem({ price: 100 });
+  cart.addItem({ price: 50 });
+  const user = { isPremium: true };
+  const discount = cart.calculateDiscount(user);
+  eq(discount, 15);
+  eq(cart.getTotal(), 135);
+  eq(cart.items.length, 2);
+  ok(user.isPremium);
+  eq(cart.discountApplied, true);
+});
 ```
 
 ## Objects and Data Structures
@@ -563,6 +675,131 @@ function applyDiscountToCart(cart: ShoppingCart, percentage: number): void {
   cart.getItems().forEach(item => {
     item.price *= (1 - percentage / 100);
   });
+}
+```
+
+## Constructor Parameters
+
+**Use object parameters when dependencies have no natural order:**
+
+- When a constructor takes multiple dependencies without an obvious natural order, use a single object parameter
+- Object parameters make the order irrelevant and dependencies explicit at the call site
+- Always use explicit type definitions for parameter objects (see Type Safety section above)
+- Even with one or two parameters, if more are likely to be added later, or it improves consistency with similar classes, prefer object parameters from the start
+
+**When to use object parameters:**
+- Multiple dependencies with no natural ordering (config, database, logger, etc.)
+- Optional parameters that would otherwise require undefined placeholders
+- When future growth is expected (easier to add parameters without breaking changes)
+- For consistency when similar classes in your codebase use object parameters
+
+**When positional parameters are acceptable:**
+- Simple value objects or primitives with clear, natural order (e.g., `Point(x, y)`) that are unlikely to grow
+- Well-established patterns (e.g., `Array.slice(start, end)`)
+
+**Good (object parameter with explicit type):**
+```typescript
+interface UserServiceParams {
+  config: Config;
+  database: Database;
+  logger: Logger;
+  emailService: EmailService;
+}
+
+class UserService {
+  private config: Config;
+  private database: Database;
+  private logger: Logger;
+  private emailService: EmailService;
+
+  constructor({ config, database, logger, emailService }: UserServiceParams) {
+    this.config = config;
+    this.database = database;
+    this.logger = logger;
+    this.emailService = emailService;
+  }
+}
+
+// Call site is clear and order-independent
+const userService = new UserService({
+  config,
+  database,
+  logger,
+  emailService
+});
+```
+
+**Bad (positional parameters with no natural order):**
+```typescript
+class UserService {
+  private config: Config;
+  private database: Database;
+  private logger: Logger;
+  private emailService: EmailService;
+
+  constructor(
+    config: Config,
+    database: Database,
+    logger: Logger,
+    emailService: EmailService
+  ) {
+    this.config = config;
+    this.database = database;
+    this.logger = logger;
+    this.emailService = emailService;
+  }
+}
+
+// Call site requires remembering arbitrary order
+const userService = new UserService(
+  config,
+  database,
+  logger,
+  emailService
+);
+
+// Easy to accidentally swap parameters
+const userService = new UserService(
+  config,
+  logger,    // Wrong order!
+  database,  // Wrong order!
+  emailService
+);
+```
+
+**Good (positional parameters for simple value object):**
+```typescript
+class Point {
+  constructor(
+    private x: number,
+    private y: number
+  ) {}
+}
+
+const point = new Point(10, 20);  // x, y is natural and conventional
+```
+
+**Good (object parameter for consistency and future growth):**
+```typescript
+interface PaymentServiceParams {
+  config: Config;
+}
+
+class PaymentService {
+  private config: Config;
+
+  constructor({ config }: PaymentServiceParams) {
+    this.config = config;
+  }
+}
+
+// Consistent with other services, easy to add dependencies later
+const paymentService = new PaymentService({ config });
+
+// Later, adding a logger doesn't break existing call sites
+interface PaymentServiceParams {
+  config: Config;
+  logger?: Logger;  // New optional parameter
 }
 ```
 

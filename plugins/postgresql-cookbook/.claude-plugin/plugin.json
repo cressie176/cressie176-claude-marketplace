@@ -1,6 +1,6 @@
 {
   "name": "postgresql-cookbook",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "PostgreSQL patterns and best practices cookbook",
   "author": {
     "name": "Steve Cresswell"
