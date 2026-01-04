@@ -757,3 +757,16 @@ process.on(ApplicationEvents.LOG, (data) => logEvents.push(data));
 - **Initialize bridge at startup**: Set up event listeners before application starts processing
 - **Consider event namespacing**: Use application-specific event names to avoid conflicts
 
+## Unref Timers
+
+Always call `.unref()` on `setInterval` and `setTimeout` to prevent them from keeping the event loop alive—unless the timer represents the primary purpose of the process.
+
+```typescript
+// Background tasks - use unref()
+const timer = setInterval(() => checkHealth(), 30000);
+timer.unref();
+
+// Primary application work - don't use unref()
+setInterval(() => processJobs(), 5000);
+```
+
